@@ -4,6 +4,8 @@ version := "1.0-SNAPSHOT"
 
 scalaVersion := "2.11.6"
 
-libraryDependencies ++= Seq("com.typesafe.play" %% "play-json" % "2.4.0")
+libraryDependencies ++= Seq(
+  "org.webjars" %% "webjars-play" % "2.4.0",
+  "com.typesafe.play" %% "play-json" % "2.4.0")
 
-lazy val root = (project in file(".")).addPlugins(PlayScala)
+lazy val root = (project in file(".")).enablePlugins(PlayScala)
