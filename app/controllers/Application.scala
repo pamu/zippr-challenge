@@ -6,21 +6,20 @@ import scala.concurrent.Future
 import global._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
+case class Request(id: Long,
+                   rows: Long,
+                   cols: Long,
+                   maze: Seq[Int],
+                   startX: Int,
+                   startY: Int,
+                   endX: Int,
+                   endY: Int)
+
 object Application extends Controller {
 
   def index = Action {
     Ok(views.html.index("Welcome to Maze Solver"))
   }
-
-
-  case class Request(id: Long,
-                     rows: Long,
-                     cols: Long,
-                     maze: Seq[Int],
-                     startX: Int,
-                     startY: Int,
-                     endX: Int,
-                     endY: Int)
 
   implicit val requestFormat = Json.format[Request]
 
@@ -28,7 +27,7 @@ object Application extends Controller {
 
     request.body.validate[Request].map {
       case req: Request =>
-        MazeGlobal.actor ! Request
+        MazeGlobal.actor ! req
         Future {
           Ok(req.toString)
         }
