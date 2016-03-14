@@ -21,6 +21,7 @@ object MazeGlobal extends GlobalSettings {
   override def onStop(app: Application): Unit = {
     super.onStop(app)
     Logger.info("App Stopped")
+    Akka.system.shutdown()
   }
 
 }

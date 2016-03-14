@@ -6,9 +6,12 @@ import scala.concurrent.Future
 import global._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-case class Request(id: Long,
-                   rows: Long,
-                   cols: Long,
+import akka.pattern.ask
+import akka.util.Timeout
+
+case class Request(id: Int,
+                   rows: Int,
+                   cols: Int,
                    maze: Seq[Int],
                    startX: Int,
                    startY: Int,
@@ -27,10 +30,10 @@ object Application extends Controller {
 
     request.body.validate[Request].map {
       case req: Request =>
-        MazeGlobal.actor ! req
-        Future {
-          Ok(req.toString)
-        }
+        if (req.cols * req.rows == req.maze.length) {
+            MazeGlobal.actor ! req
+          Future(Ok("Hit /wayout to get all paths of the maze. ensure you use the same id."))
+        } else Future(BadRequest("Insufficient, Maze should have rows * cols number of elements."))
     }.recoverTotal {
       ex => Future {
         BadRequest("Improper Input")
@@ -39,10 +42,21 @@ object Application extends Controller {
 
   }
 
+  case class Res(id: Int)
+  implicit  val resFormat = Json.format[Res]
+
   def wayout = Action.async(parse.json) { request =>
-    Future {
-      Ok("")
-    }
+      request.body.validate[Res].map {
+        case res: Res =>
+          import scala.concurrent.duration._
+          implicit val timeout = Timeout(5 seconds)
+            val f = (MazeGlobal.actor ? res.id).mapTo[String]
+          f.map { str => Ok(Json.obj("result" -> str)) }.recover {case ex => Ok(Json.obj("error" -> ex.getMessage))}
+      }.recoverTotal {
+        ex => Future {
+          BadRequest("Bad input")
+        }
+      }
   }
 
 }
