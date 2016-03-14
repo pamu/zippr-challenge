@@ -8,7 +8,6 @@ import akka.actor.Actor
 
 object MazeActor {
   case class Point(a: Int, b: Int)
-  case class Req(id: Long, maze: Array[Array[Boolean]])
   case class Res(id: Long, path: List[Point])
 }
 
